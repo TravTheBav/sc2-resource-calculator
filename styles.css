@@ -1,0 +1,13 @@
+html, body {
+    width: 100%;
+}
+
+body {
+    background-image: url("assets/ui_screens_default_nebula01.png");
+    background-repeat: repeat;
+}
+
+.wire-frame {
+    background-color: transparent;
+    filter: sepia(100%) hue-rotate(180deg) saturate(200%);
+}
