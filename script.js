@@ -1,5 +1,7 @@
 let create_base_button = document.getElementById("create-base");
 create_base_button.addEventListener("click", CreateNewBase);
+let delete_base_button = document.getElementById("delete-base");
+delete_base_button.addEventListener("click", DeleteLastBase);
 
 function CreateNewBase() {
     let base_card = document.createElement('div');
@@ -9,6 +11,11 @@ function CreateNewBase() {
     setBaseCardIcons();
     setBaseCardWorkerCounters(base_card);
     setBaseCardButtons(base_card);
+}
+
+function DeleteLastBase() {
+    let last_base = document.querySelector('body').lastChild;
+    document.querySelector('body').removeChild(last_base);
 }
 
 function setBaseCardIcons() {
@@ -56,7 +63,9 @@ function setBaseCardButtons(base_card) {
         button_group.id = i;
         
         let down_button = document.createElement('button');
+        down_button.textContent = "-";
         let up_button = document.createElement('button');
+        up_button.textContent = "+";
         button_group.appendChild(down_button);
         button_group.appendChild(up_button);
         base_card.appendChild(button_group);

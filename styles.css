@@ -29,3 +29,13 @@ body {
     text-align: center;
     color: white;
 }
+
+.up-down-buttons {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.up-down-buttons button {
+    font-size: larger;
+    width: 2rem;
+}
