@@ -7,6 +7,15 @@ body {
     background-repeat: repeat;
 }
 
+.base-card {
+    width: fit-content;
+    background-color: rgba(0, 255, 34, 0.15);
+    padding: 4px;
+    margin: 4px;
+    border: 2px dashed rgba(0, 255, 34);
+    border-radius: 8px;
+}
+
 .wire-frame {
     background-color: transparent;
     filter: sepia(100%) hue-rotate(180deg) saturate(200%);
