@@ -8,15 +8,24 @@ body {
 }
 
 .base-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     width: fit-content;
     background-color: rgba(0, 255, 34, 0.15);
-    padding: 4px;
-    margin: 4px;
+    padding: 10px;
+    margin: 10px;
+    gap: 4px;
     border: 2px dashed rgba(0, 255, 34);
     border-radius: 8px;
 }
 
 .wire-frame {
     background-color: transparent;
-    filter: sepia(100%) hue-rotate(180deg) saturate(200%);
+    filter: sepia(100%) hue-rotate(200deg) saturate(200%);
+}
+
+.worker-counter {
+    font-size: xx-large;
+    text-align: center;
+    color: white;
 }
