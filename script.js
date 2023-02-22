@@ -4,6 +4,7 @@ let create_base_button = document.getElementById("create-base");
 create_base_button.addEventListener("click", CreateNewBase);
 let delete_base_button = document.getElementById("delete-base");
 delete_base_button.addEventListener("click", DeleteLastBase);
+let total_worker_counter = document.querySelector('span.total-worker-counter');
 
 function CreateNewBase() {
     let base_card = document.createElement('div');
@@ -95,6 +96,7 @@ function workerButtonDownClick(base_card_id, button_group_id) {
     let denominator = str.split("/")[1];
     if (numerator > 0) {
         numerator--;
+        updateTotalWorkers('down');
     }
     worker_counter.textContent = numerator.toString() + "/" + denominator;
 }
@@ -104,6 +106,23 @@ function workerButtonUpClick(base_card_id, button_group_id) {
     let str = worker_counter.textContent;
     let numerator = parseInt(str.split("/")[0]);
     let denominator = str.split("/")[1];
-    numerator++;
+    if (totalWorkers() < 100) {
+        numerator++;
+        updateTotalWorkers('up');
+    }
     worker_counter.textContent = numerator.toString() + "/" + denominator;
+}
+
+function updateTotalWorkers(flag) {
+    let total = totalWorkers();
+    if (flag == 'down' && total > 0) {
+        total--;
+    } else if (flag == 'up' && total < 100) {
+        total++;
+    }
+    total_worker_counter.textContent = total.toString();
+}
+
+function totalWorkers() {
+    return parseInt(total_worker_counter.textContent);
 }
