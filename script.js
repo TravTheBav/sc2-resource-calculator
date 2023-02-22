@@ -48,17 +48,17 @@ function setBaseCardWorkerCounters(base_card) {
 
     let gas_worker_counter_left = document.createElement('div');
     gas_worker_counter_left.classList.add('worker-counter');
-    gas_worker_counter_left.id = start_idx;
+    gas_worker_counter_left.id = "worker-counter-" + start_idx;
     gas_worker_counter_left.textContent = "0/3";
     
     let mineral_worker_counter = document.createElement('div');
     mineral_worker_counter.classList.add('worker-counter');
-    mineral_worker_counter.id = start_idx + 1;
+    mineral_worker_counter.id = "worker-counter-" + (start_idx + 1).toString();
     mineral_worker_counter.textContent = "0/16";
 
     let gas_worker_counter_right = document.createElement('div');
     gas_worker_counter_right.classList.add('worker-counter');
-    gas_worker_counter_right.id = start_idx + 2;
+    gas_worker_counter_right.id = "worker-counter-" + (start_idx + 2).toString();
     gas_worker_counter_right.textContent = "0/3";        
 
     base_card.appendChild(gas_worker_counter_left);
@@ -70,7 +70,7 @@ function setBaseCardButtons(base_card) {
     for (let i = (totalBases * 3) - 2; i < (totalBases * 3) + 1; i++) {
         let button_group = document.createElement('div');
         button_group.classList.add('up-down-buttons');
-        button_group.id = "button-group-" + i.toString();
+        button_group.id = i;
         
         let down_button = document.createElement('button');
         down_button.classList.add('down');
@@ -89,7 +89,7 @@ function setBaseCardButtons(base_card) {
 }
 
 function workerButtonDownClick(base_card_id, button_group_id) {
-    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#${button_group_id}.worker-counter`);
+    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#worker-counter-${button_group_id}.worker-counter`);
     let str = worker_counter.textContent;
     let numerator = parseInt(str.split("/")[0]);
     let denominator = str.split("/")[1];
@@ -100,7 +100,7 @@ function workerButtonDownClick(base_card_id, button_group_id) {
 }
 
 function workerButtonUpClick(base_card_id, button_group_id) {
-    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#${button_group_id}.worker-counter`);
+    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#worker-counter-${button_group_id}.worker-counter`);
     let str = worker_counter.textContent;
     let numerator = parseInt(str.split("/")[0]);
     let denominator = str.split("/")[1];
