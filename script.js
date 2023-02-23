@@ -1,128 +1,153 @@
 let totalBases = 0;
 
-let create_base_button = document.getElementById("create-base");
-create_base_button.addEventListener("click", CreateNewBase);
-let delete_base_button = document.getElementById("delete-base");
-delete_base_button.addEventListener("click", DeleteLastBase);
-let total_worker_counter = document.querySelector('span.total-worker-counter');
+let createBaseButton = document.getElementById("create-base");
+createBaseButton.addEventListener("click", CreateNewBase);
+let deleteBaseButton = document.getElementById("delete-base");
+deleteBaseButton.addEventListener("click", DeleteLastBase);
+let totalWorkerCounter = document.querySelector('span.total-worker-counter');
 
 function CreateNewBase() {
-    let base_card = document.createElement('div');
-    base_card.classList.add('base-card');
+    let baseCard = document.createElement('div');
+    baseCard.classList.add('base-card');
     totalBases++;
-    base_card.id = "base-" + totalBases.toString();
-    document.querySelector('.base-wrapper').appendChild(base_card);
+    baseCard.id = "base-" + totalBases.toString();
+    document.querySelector('.base-wrapper').appendChild(baseCard);
 
     setBaseCardIcons();
-    setBaseCardWorkerCounters(base_card);
-    setBaseCardButtons(base_card);
+    setBaseCardWorkerCounters(baseCard);
+    setBaseCardButtons(baseCard);
 }
 
 function DeleteLastBase() {
-    let last_base = document.querySelector('.base-wrapper').lastChild;
-    document.querySelector('.base-wrapper').removeChild(last_base);
+    let lastBase = document.querySelector('.base-wrapper').lastChild;
+    let workersFromLastBase = totalWorkersOnBase(lastBase); 
+
+    document.querySelector('.base-wrapper').removeChild(lastBase);
     if (totalBases > 0) {
         totalBases--;
+        updateTotalWorkers('down', workersFromLastBase);
     }
 }
 
 function setBaseCardIcons() {
-    let base_building_icon = document.createElement('img');
-    base_building_icon.classList.add('wire-frame');
-    base_building_icon.setAttribute('src', 'assets/wireframe-terran-commandcenter.png');
+    let baseBuildingIcon = document.createElement('img');
+    baseBuildingIcon.classList.add('wire-frame');
+    baseBuildingIcon.setAttribute('src', 'assets/wireframe-terran-commandcenter.png');
     
-    let gas_collection_building_icon_1 = document.createElement('img');
-    gas_collection_building_icon_1.classList.add('wire-frame');
-    gas_collection_building_icon_1.setAttribute('src', 'assets/wireframe-terran-refinery.png');
+    let vespeneBuildingIcon1 = document.createElement('img');
+    vespeneBuildingIcon1.classList.add('wire-frame');
+    vespeneBuildingIcon1.setAttribute('src', 'assets/wireframe-terran-refinery.png');
 
-    let gas_collection_building_icon_2 = document.createElement('img');
-    gas_collection_building_icon_2.classList.add('wire-frame');
-    gas_collection_building_icon_2.setAttribute('src', 'assets/wireframe-terran-refinery.png');
+    let vespeneBuildingIcon2 = document.createElement('img');
+    vespeneBuildingIcon2.classList.add('wire-frame');
+    vespeneBuildingIcon2.setAttribute('src', 'assets/wireframe-terran-refinery.png');
 
-    document.querySelector('.base-wrapper').lastChild.appendChild(gas_collection_building_icon_1);
-    document.querySelector('.base-wrapper').lastChild.appendChild(base_building_icon);
-    document.querySelector('.base-wrapper').lastChild.appendChild(gas_collection_building_icon_2);
+    document.querySelector('.base-wrapper').lastChild.appendChild(vespeneBuildingIcon1);
+    document.querySelector('.base-wrapper').lastChild.appendChild(baseBuildingIcon);
+    document.querySelector('.base-wrapper').lastChild.appendChild(vespeneBuildingIcon2);
 }
 
-function setBaseCardWorkerCounters(base_card) {
-    let start_idx = (totalBases * 3) - 2;
+function setBaseCardWorkerCounters(baseCard) {
+    let startIdx = (totalBases * 3) - 2;
 
-    let gas_worker_counter_left = document.createElement('div');
-    gas_worker_counter_left.classList.add('worker-counter');
-    gas_worker_counter_left.id = "worker-counter-" + start_idx;
-    gas_worker_counter_left.textContent = "0/3";
+    let leftVespeneWorkerCounter = document.createElement('div');
+    leftVespeneWorkerCounter.classList.add('worker-counter');
+    leftVespeneWorkerCounter.id = "worker-counter-" + startIdx;
+    leftVespeneWorkerCounter.textContent = "0/3";
     
-    let mineral_worker_counter = document.createElement('div');
-    mineral_worker_counter.classList.add('worker-counter');
-    mineral_worker_counter.id = "worker-counter-" + (start_idx + 1).toString();
-    mineral_worker_counter.textContent = "0/16";
+    let mineralWorkerCounter = document.createElement('div');
+    mineralWorkerCounter.classList.add('worker-counter');
+    mineralWorkerCounter.id = "worker-counter-" + (startIdx + 1).toString();
+    mineralWorkerCounter.textContent = "0/16";
 
-    let gas_worker_counter_right = document.createElement('div');
-    gas_worker_counter_right.classList.add('worker-counter');
-    gas_worker_counter_right.id = "worker-counter-" + (start_idx + 2).toString();
-    gas_worker_counter_right.textContent = "0/3";        
+    let rightVespeneWorkerCounter = document.createElement('div');
+    rightVespeneWorkerCounter.classList.add('worker-counter');
+    rightVespeneWorkerCounter.id = "worker-counter-" + (startIdx + 2).toString();
+    rightVespeneWorkerCounter.textContent = "0/3";        
 
-    base_card.appendChild(gas_worker_counter_left);
-    base_card.appendChild(mineral_worker_counter);
-    base_card.appendChild(gas_worker_counter_right);
+    baseCard.appendChild(leftVespeneWorkerCounter);
+    baseCard.appendChild(mineralWorkerCounter);
+    baseCard.appendChild(rightVespeneWorkerCounter);
 }
 
-function setBaseCardButtons(base_card) {
+function setBaseCardButtons(baseCard) {
     for (let i = (totalBases * 3) - 2; i < (totalBases * 3) + 1; i++) {
-        let button_group = document.createElement('div');
-        button_group.classList.add('up-down-buttons');
-        button_group.id = i;
+        let buttonGroup = document.createElement('div');
+        buttonGroup.classList.add('up-down-buttons');
+        buttonGroup.id = i;
         
-        let down_button = document.createElement('button');
-        down_button.classList.add('down');
-        down_button.textContent = "-";
-        down_button.addEventListener('click', function() { workerButtonDownClick(base_card.id, button_group.id); });
+        let downButton = document.createElement('button');
+        downButton.classList.add('down');
+        downButton.textContent = "-";
+        downButton.addEventListener('click', function() { workerButtonDownClick(baseCard.id, buttonGroup.id); });
         
-        let up_button = document.createElement('button');
-        up_button.classList.add('up');
-        up_button.textContent = "+";
-        up_button.addEventListener('click', function() { workerButtonUpClick(base_card.id, button_group.id); });
+        let upButton = document.createElement('button');
+        upButton.classList.add('up');
+        upButton.textContent = "+";
+        upButton.addEventListener('click', function() { workerButtonUpClick(baseCard.id, buttonGroup.id); });
 
-        button_group.appendChild(down_button);
-        button_group.appendChild(up_button);
-        base_card.appendChild(button_group);
+        buttonGroup.appendChild(downButton);
+        buttonGroup.appendChild(upButton);
+        baseCard.appendChild(buttonGroup);
     }
 }
 
-function workerButtonDownClick(base_card_id, button_group_id) {
-    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#worker-counter-${button_group_id}.worker-counter`);
-    let str = worker_counter.textContent;
-    let numerator = parseInt(str.split("/")[0]);
-    let denominator = str.split("/")[1];
+function workerButtonDownClick(baseCardId, buttonGroupId) {
+    let workerCounter = document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
+    let str = workerCounter.textContent;
+    let numerator = getNumerator(str);
+    let denominator = getDenominator(str);
     if (numerator > 0) {
         numerator--;
-        updateTotalWorkers('down');
+        updateTotalWorkers('down', 1);
     }
-    worker_counter.textContent = numerator.toString() + "/" + denominator;
+    workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
 }
 
-function workerButtonUpClick(base_card_id, button_group_id) {
-    let worker_counter = document.querySelector(`div#${base_card_id}.base-card div#worker-counter-${button_group_id}.worker-counter`);
-    let str = worker_counter.textContent;
-    let numerator = parseInt(str.split("/")[0]);
-    let denominator = str.split("/")[1];
+function workerButtonUpClick(baseCardId, buttonGroupId) {
+    let workerCounter = document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
+    let str = workerCounter.textContent;
+    let numerator = getNumerator(str);
+    let denominator = getDenominator(str);
     if (totalWorkers() < 100) {
         numerator++;
-        updateTotalWorkers('up');
+        updateTotalWorkers('up', 1);
     }
-    worker_counter.textContent = numerator.toString() + "/" + denominator;
+    workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
 }
 
-function updateTotalWorkers(flag) {
+function updateTotalWorkers(flag, amount) {
     let total = totalWorkers();
     if (flag == 'down' && total > 0) {
-        total--;
+        total -= amount;
     } else if (flag == 'up' && total < 100) {
-        total++;
+        total += amount;
     }
-    total_worker_counter.textContent = total.toString();
+    totalWorkerCounter.textContent = total.toString();
 }
 
+// returns all workers across all bases
 function totalWorkers() {
-    return parseInt(total_worker_counter.textContent);
+    return parseInt(totalWorkerCounter.textContent);
+}
+
+// returns all workers at a given base
+function totalWorkersOnBase(base) {
+    let total = 0;
+    let workerCounters = base.querySelectorAll('.worker-counter');
+    for (let i = 0; i < workerCounters.length; i++) {
+        let workers = getNumerator(workerCounters[i].textContent);
+        total += workers;
+    }
+    return total;
+}
+
+// parses a string representing a fraction and returns the numerator as an int
+function getNumerator(str) {
+    return parseInt(str.split("/")[0]);
+}
+
+// parses a string representing a fraction and returns the denominator as an int
+function getDenominator(str) {
+    return parseInt(str.split("/")[1]);
 }
