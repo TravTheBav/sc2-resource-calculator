@@ -16,6 +16,8 @@ function CreateNewBase() {
     setBaseCardIcons();
     setBaseCardWorkerCounters(baseCard);
     setBaseCardButtons(baseCard);
+    setBaseCardIncome(baseCard, 'minerals');
+    setBaseCardIncome(baseCard, 'gas');
 }
 
 function DeleteLastBase() {
@@ -114,6 +116,30 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         updateTotalWorkers('up', 1);
     }
     workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
+}
+
+function setBaseCardMineralIncome(baseCard) {
+    let wrapper = document.createElement('div');
+    wrapper.classList.add('wrapper');
+    wrapper.classList.add('mineral-income')
+    wrapper.textContent = "Minerals per minute: ";
+    let mineralIncome = document.createElement('span');
+    mineralIncome.classList.add('mineral-income-amount');
+    mineralIncome.textContent = "0";
+    wrapper.appendChild(mineralIncome);
+    baseCard.appendChild(wrapper);
+}
+
+function setBaseCardIncome(baseCard, incomeType) {
+    let wrapper = document.createElement('div');
+    wrapper.classList.add('wrapper');
+    wrapper.classList.add(`${incomeType}-income`);
+    wrapper.textContent = `${incomeType} per minute: `;
+    let incomeRate = document.createElement('span');
+    incomeRate.classList.add(`${incomeType}-income-amount`);
+    incomeRate.textContent = "0";
+    wrapper.appendChild(incomeRate);
+    baseCard.appendChild(wrapper);
 }
 
 function updateTotalWorkers(flag, amount) {
