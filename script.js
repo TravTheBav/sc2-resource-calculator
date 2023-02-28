@@ -1,3 +1,6 @@
+const maxWorkers = 200;
+const mineralFullSaturation = 16;
+const vespeneFullSaturation = 3;
 let totalBases = 0;
 
 let createBaseButton = document.getElementById("create-base");
@@ -99,11 +102,17 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
     let denominator = getDenominator(str);
-    if (numerator > 0) {
+    if (validWorkerDownClick(numerator)) {
         numerator--;
         updateTotalWorkers('down', 1);
+        workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
+        if (denominator == mineralFullSaturation) {
+            updateMineralGatherRate(numerator, baseCardId);
+        }   else {
+            updateVespeneGatherRate(baseCardId);
+        }
+        
     }
-    workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
 }
 
 function workerButtonUpClick(baseCardId, buttonGroupId) {
@@ -111,23 +120,56 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
     let denominator = getDenominator(str);
-    if (totalWorkers() < 100) {
+    if (validWorkerUpClick(numerator, denominator)) {
         numerator++;
         updateTotalWorkers('up', 1);
-    }
-    workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
+        workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
+        if (denominator == mineralFullSaturation) {
+            updateMineralGatherRate(numerator, baseCardId);
+        }   else {
+            updateVespeneGatherRate(baseCardId);
+        }
+        
+    }    
 }
 
-function setBaseCardMineralIncome(baseCard) {
-    let wrapper = document.createElement('div');
-    wrapper.classList.add('wrapper');
-    wrapper.classList.add('mineral-income')
-    wrapper.textContent = "Minerals per minute: ";
-    let mineralIncome = document.createElement('span');
-    mineralIncome.classList.add('mineral-income-amount');
-    mineralIncome.textContent = "0";
-    wrapper.appendChild(mineralIncome);
-    baseCard.appendChild(wrapper);
+function validWorkerDownClick(numerator) {
+    if (numerator > 0) {
+        return true;
+    }   else {
+        return false;
+    }
+}
+
+function validWorkerUpClick(numerator, denominator) {
+    if (totalWorkers() < maxWorkers) {
+        if ((denominator == mineralFullSaturation) && (numerator < 24)) {
+            return true;
+        }   else if ((denominator == vespeneFullSaturation) && (numerator < vespeneFullSaturation)) {
+            return true;
+        }
+    }
+    return false;    
+}
+
+function updateMineralGatherRate(workers, baseCardId) {
+    let base = document.querySelector(`div#${baseCardId}.base-card`);
+    let currentIncome = base.querySelector('.minerals-income-amount');
+    if (workers <= mineralFullSaturation) {
+        currentIncome.textContent = workers * 40;
+    }   else if (workers <= 24) {
+        currentIncome.textContent = (16 * 40) + ((workers - 16) * 20);
+    }
+}
+
+function updateVespeneGatherRate(baseCardId) {
+    let base = document.querySelector(`div#${baseCardId}.base-card`);
+    let income = base.querySelector('.gas-income-amount');
+    let leftIdNum = totalBases * 3 - 2;
+    let rightIdNum = totalBases * 3;
+    let leftVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${leftIdNum}`).textContent);
+    let rightVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${rightIdNum}`).textContent);
+    income.textContent = (leftVespeneWorkerCount * 38) + (rightVespeneWorkerCount * 38);
 }
 
 function setBaseCardIncome(baseCard, incomeType) {
