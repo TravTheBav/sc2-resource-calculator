@@ -155,21 +155,24 @@ function validWorkerUpClick(numerator, denominator) {
 function updateMineralGatherRate(workers, baseCardId) {
     let base = document.querySelector(`div#${baseCardId}.base-card`);
     let currentIncome = base.querySelector('.minerals-income-amount');
+    let optimalMineralGatherRate = 59;
+    let subOptimalMineralGatherRate = 25;
     if (workers <= mineralFullSaturation) {
-        currentIncome.textContent = workers * 40;
+        currentIncome.textContent = workers * optimalMineralGatherRate;
     }   else if (workers <= 24) {
-        currentIncome.textContent = (16 * 40) + ((workers - 16) * 20);
+        currentIncome.textContent = (16 * optimalMineralGatherRate) + ((workers - 16) * subOptimalMineralGatherRate);
     }
 }
 
 function updateVespeneGatherRate(baseCardId) {
     let base = document.querySelector(`div#${baseCardId}.base-card`);
     let income = base.querySelector('.gas-income-amount');
+    let vespeneGatherRate = 53;
     let leftIdNum = totalBases * 3 - 2;
     let rightIdNum = totalBases * 3;
     let leftVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${leftIdNum}`).textContent);
     let rightVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${rightIdNum}`).textContent);
-    income.textContent = (leftVespeneWorkerCount * 38) + (rightVespeneWorkerCount * 38);
+    income.textContent = (leftVespeneWorkerCount * vespeneGatherRate) + (rightVespeneWorkerCount * vespeneGatherRate);
 }
 
 function setBaseCardIncome(baseCard, incomeType) {
