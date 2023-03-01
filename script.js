@@ -1,19 +1,20 @@
 const maxWorkers = 200;
-const mineralFullSaturation = 16;
-const vespeneFullSaturation = 3;
-let totalBases = 0;
+const maxBases = 8;
+const mineralOptimalSaturation = 16;
+const vespeneOptimalSaturation = 3;
 
 let createBaseButton = document.getElementById("create-base");
 createBaseButton.addEventListener("click", CreateNewBase);
 let deleteBaseButton = document.getElementById("delete-base");
 deleteBaseButton.addEventListener("click", DeleteLastBase);
 let totalWorkerCounter = document.querySelector('span.total-worker-counter');
+let totalBaseCounter = document.querySelector('span.total-base-counter');
 
 function CreateNewBase() {
     let baseCard = document.createElement('div');
     baseCard.classList.add('base-card');
-    totalBases++;
-    baseCard.id = "base-" + totalBases.toString();
+    updateTotalBases('up', 1);
+    baseCard.id = "base-" + totalBases();
     document.querySelector('.base-wrapper').appendChild(baseCard);
 
     setBaseCardIcons();
@@ -28,8 +29,8 @@ function DeleteLastBase() {
     let workersFromLastBase = totalWorkersOnBase(lastBase); 
 
     document.querySelector('.base-wrapper').removeChild(lastBase);
-    if (totalBases > 0) {
-        totalBases--;
+    if (totalBases() > 0) {
+        updateTotalBases('down', 1);
         updateTotalWorkers('down', workersFromLastBase);
     }
 }
@@ -53,7 +54,7 @@ function setBaseCardIcons() {
 }
 
 function setBaseCardWorkerCounters(baseCard) {
-    let startIdx = (totalBases * 3) - 2;
+    let startIdx = (totalBases() * 3) - 2;
 
     let leftVespeneWorkerCounter = document.createElement('div');
     leftVespeneWorkerCounter.classList.add('worker-counter');
@@ -76,7 +77,7 @@ function setBaseCardWorkerCounters(baseCard) {
 }
 
 function setBaseCardButtons(baseCard) {
-    for (let i = (totalBases * 3) - 2; i < (totalBases * 3) + 1; i++) {
+    for (let i = (totalBases() * 3) - 2; i < (totalBases() * 3) + 1; i++) {
         let buttonGroup = document.createElement('div');
         buttonGroup.classList.add('up-down-buttons');
         buttonGroup.id = i;
@@ -106,7 +107,7 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         numerator--;
         updateTotalWorkers('down', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == mineralFullSaturation) {
+        if (denominator == mineralOptimalSaturation) {
             updateMineralGatherRate(numerator, baseCardId);
         }   else {
             updateVespeneGatherRate(baseCardId);
@@ -124,7 +125,7 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         numerator++;
         updateTotalWorkers('up', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == mineralFullSaturation) {
+        if (denominator == mineralOptimalSaturation) {
             updateMineralGatherRate(numerator, baseCardId);
         }   else {
             updateVespeneGatherRate(baseCardId);
@@ -143,9 +144,9 @@ function validWorkerDownClick(numerator) {
 
 function validWorkerUpClick(numerator, denominator) {
     if (totalWorkers() < maxWorkers) {
-        if ((denominator == mineralFullSaturation) && (numerator < 24)) {
+        if ((denominator == mineralOptimalSaturation) && (numerator < 24)) {
             return true;
-        }   else if ((denominator == vespeneFullSaturation) && (numerator < vespeneFullSaturation)) {
+        }   else if ((denominator == vespeneOptimalSaturation) && (numerator < vespeneOptimalSaturation)) {
             return true;
         }
     }
@@ -157,7 +158,7 @@ function updateMineralGatherRate(workers, baseCardId) {
     let currentIncome = base.querySelector('.minerals-income-amount');
     let optimalMineralGatherRate = 59;
     let subOptimalMineralGatherRate = 25;
-    if (workers <= mineralFullSaturation) {
+    if (workers <= mineralOptimalSaturation) {
         currentIncome.textContent = workers * optimalMineralGatherRate;
     }   else if (workers <= 24) {
         currentIncome.textContent = (16 * optimalMineralGatherRate) + ((workers - 16) * subOptimalMineralGatherRate);
@@ -168,8 +169,8 @@ function updateVespeneGatherRate(baseCardId) {
     let base = document.querySelector(`div#${baseCardId}.base-card`);
     let income = base.querySelector('.gas-income-amount');
     let vespeneGatherRate = 53;
-    let leftIdNum = totalBases * 3 - 2;
-    let rightIdNum = totalBases * 3;
+    let leftIdNum = getBasePosition(baseCardId) * 3 - 2;
+    let rightIdNum = getBasePosition(baseCardId) * 3;
     let leftVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${leftIdNum}`).textContent);
     let rightVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${rightIdNum}`).textContent);
     income.textContent = (leftVespeneWorkerCount * vespeneGatherRate) + (rightVespeneWorkerCount * vespeneGatherRate);
@@ -191,15 +192,29 @@ function updateTotalWorkers(flag, amount) {
     let total = totalWorkers();
     if (flag == 'down' && total > 0) {
         total -= amount;
-    } else if (flag == 'up' && total < 100) {
+    } else if (flag == 'up' && total < maxWorkers) {
         total += amount;
     }
     totalWorkerCounter.textContent = total.toString();
 }
 
+function updateTotalBases(flag, amount) {
+    let total = totalBases();
+    if (flag == 'down' && total > 0) {
+        total -= amount;
+    }   else if (flag == 'up' && total < maxBases) {
+        total += amount;
+    }
+    totalBaseCounter.textContent = total.toString();
+}
+
 // returns all workers across all bases
 function totalWorkers() {
     return parseInt(totalWorkerCounter.textContent);
+}
+
+function totalBases() {
+    return parseInt(totalBaseCounter.textContent);
 }
 
 // returns all workers at a given base
@@ -221,4 +236,12 @@ function getNumerator(str) {
 // parses a string representing a fraction and returns the denominator as an int
 function getDenominator(str) {
     return parseInt(str.split("/")[1]);
+}
+
+// returns the position of the base in the list of all bases
+function getBasePosition(baseCardId) {
+    base = document.querySelector(`div#${baseCardId}`);
+    basesNodeList = base.parentNode;
+    let index = Array.prototype.indexOf.call(basesNodeList.children, base);
+    return index + 1;
 }
