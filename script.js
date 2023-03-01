@@ -11,28 +11,34 @@ let totalWorkerCounter = document.querySelector('span.total-worker-counter');
 let totalBaseCounter = document.querySelector('span.total-base-counter');
 
 function CreateNewBase() {
-    let baseCard = document.createElement('div');
-    baseCard.classList.add('base-card');
-    updateTotalBases('up', 1);
-    baseCard.id = "base-" + totalBases();
-    document.querySelector('.base-wrapper').appendChild(baseCard);
-
-    setBaseCardIcons();
-    setBaseCardWorkerCounters(baseCard);
-    setBaseCardButtons(baseCard);
-    setBaseCardIncome(baseCard, 'minerals');
-    setBaseCardIncome(baseCard, 'gas');
-}
-
-function DeleteLastBase() {
-    let lastBase = document.querySelector('.base-wrapper').lastChild;
-    let workersFromLastBase = totalWorkersOnBase(lastBase); 
-
-    document.querySelector('.base-wrapper').removeChild(lastBase);
-    if (totalBases() > 0) {
-        updateTotalBases('down', 1);
-        updateTotalWorkers('down', workersFromLastBase);
+    if (totalBases() < 8) {
+        let baseCard = document.createElement('div');
+        baseCard.classList.add('base-card');
+        updateTotalBases('up', 1);
+        baseCard.id = "base-" + totalBases();
+        document.querySelector('.base-wrapper').appendChild(baseCard);
+    
+        setBaseCardIcons();
+        setBaseCardWorkerCounters(baseCard);
+        setBaseCardButtons(baseCard);
+        setBaseCardIncome(baseCard, 'minerals');
+        setBaseCardIncome(baseCard, 'gas');
     }
+}
+    
+function DeleteLastBase() {
+    if (totalBases() == 0) {
+        return;
+    } else {
+        let lastBase = document.querySelector('.base-wrapper').lastChild;
+        let workersFromLastBase = totalWorkersOnBase(lastBase); 
+    
+        document.querySelector('.base-wrapper').removeChild(lastBase);
+        if (totalBases() > 0) {
+            updateTotalBases('down', 1);
+            updateTotalWorkers('down', workersFromLastBase);
+        }
+    }    
 }
 
 function setBaseCardIcons() {
