@@ -1,7 +1,11 @@
 const maxWorkers = 200;
 const maxBases = 8;
 const mineralOptimalSaturation = 16;
+const mineralSubOptimalSaturation = 24;
 const vespeneOptimalSaturation = 3;
+const optimalMineralGatherRate = 59;
+const subOptimalMineralGatherRate = 25;
+const vespeneGatherRate = 53;
 
 let createBaseButton = document.getElementById("create-base");
 createBaseButton.addEventListener("click", CreateNewBase);
@@ -9,9 +13,11 @@ let deleteBaseButton = document.getElementById("delete-base");
 deleteBaseButton.addEventListener("click", DeleteLastBase);
 let totalWorkerCounter = document.querySelector('span.total-worker-counter');
 let totalBaseCounter = document.querySelector('span.total-base-counter');
+let totalMineralCounter = document.querySelector('span.total-mineral-counter');
+let totalVespeneCounter = document.querySelector('span.total-vespene-counter');
 
 function CreateNewBase() {
-    if (totalBases() < 8) {
+    if (totalBases() < maxBases) {
         let baseCard = document.createElement('div');
         baseCard.classList.add('base-card');
         updateTotalBases('up', 1);
@@ -31,13 +37,14 @@ function DeleteLastBase() {
         return;
     } else {
         let lastBase = document.querySelector('.base-wrapper').lastChild;
-        let workersFromLastBase = totalWorkersOnBase(lastBase); 
-    
-        document.querySelector('.base-wrapper').removeChild(lastBase);
-        if (totalBases() > 0) {
-            updateTotalBases('down', 1);
-            updateTotalWorkers('down', workersFromLastBase);
-        }
+        let workersFromLastBase = totalWorkersOnBase(lastBase);    
+        
+        updateTotalBases('down', 1);
+        updateTotalWorkers('down', workersFromLastBase);
+        updateTotalIncomeOnBaseDelete(lastBase.id, 'minerals');
+        updateTotalIncomeOnBaseDelete(lastBase.id, 'gas');
+        
+        document.querySelector('.base-wrapper').removeChild(lastBase);        
     }    
 }
 
@@ -105,7 +112,7 @@ function setBaseCardButtons(baseCard) {
 }
 
 function workerButtonDownClick(baseCardId, buttonGroupId) {
-    let workerCounter = document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
+    let workerCounter = workerCounterQuerySelector(baseCardId, buttonGroupId);
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
     let denominator = getDenominator(str);
@@ -115,15 +122,16 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
         if (denominator == mineralOptimalSaturation) {
             updateMineralGatherRate(numerator, baseCardId);
+            updateTotalMineralGatherRate(numerator, 'down');
         }   else {
             updateVespeneGatherRate(baseCardId);
-        }
-        
+            updateTotalVespeneGatherRate('down');
+        }        
     }
 }
 
 function workerButtonUpClick(baseCardId, buttonGroupId) {
-    let workerCounter = document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
+    let workerCounter = workerCounterQuerySelector(baseCardId, buttonGroupId);
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
     let denominator = getDenominator(str);
@@ -133,10 +141,11 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
         if (denominator == mineralOptimalSaturation) {
             updateMineralGatherRate(numerator, baseCardId);
+            updateTotalMineralGatherRate(numerator, 'up');
         }   else {
             updateVespeneGatherRate(baseCardId);
-        }
-        
+            updateTotalVespeneGatherRate('up');
+        }        
     }    
 }
 
@@ -150,7 +159,7 @@ function validWorkerDownClick(numerator) {
 
 function validWorkerUpClick(numerator, denominator) {
     if (totalWorkers() < maxWorkers) {
-        if ((denominator == mineralOptimalSaturation) && (numerator < 24)) {
+        if ((denominator == mineralOptimalSaturation) && (numerator < mineralSubOptimalSaturation)) {
             return true;
         }   else if ((denominator == vespeneOptimalSaturation) && (numerator < vespeneOptimalSaturation)) {
             return true;
@@ -159,27 +168,64 @@ function validWorkerUpClick(numerator, denominator) {
     return false;    
 }
 
+// updates mineral gather rate for a single base
 function updateMineralGatherRate(workers, baseCardId) {
-    let base = document.querySelector(`div#${baseCardId}.base-card`);
+    let base = baseQuerySelector(baseCardId);
     let currentIncome = base.querySelector('.minerals-income-amount');
-    let optimalMineralGatherRate = 59;
-    let subOptimalMineralGatherRate = 25;
     if (workers <= mineralOptimalSaturation) {
         currentIncome.textContent = workers * optimalMineralGatherRate;
-    }   else if (workers <= 24) {
-        currentIncome.textContent = (16 * optimalMineralGatherRate) + ((workers - 16) * subOptimalMineralGatherRate);
+    }   else if (workers <= mineralSubOptimalSaturation) {
+        currentIncome.textContent = (mineralOptimalSaturation * optimalMineralGatherRate) +
+                                    ((workers - mineralOptimalSaturation) * subOptimalMineralGatherRate);
     }
 }
 
+// updates total minerals across all bases when a worker is added/subtracted
+function updateTotalMineralGatherRate(workers, flag) {
+    let num = parseInt(totalMineralCounter.textContent);
+    if (workers <= mineralOptimalSaturation && flag == 'up') {
+        num += optimalMineralGatherRate;
+    }   else if (workers <= subOptimalMineralGatherRate && flag == 'up') {
+        num += subOptimalMineralGatherRate;
+    }   else if (workers < mineralOptimalSaturation && flag == 'down') {
+        num -= optimalMineralGatherRate;
+    }   else  {
+        num -= subOptimalMineralGatherRate;
+    }
+    totalMineralCounter.textContent = num;
+}
+
+// updates total minerals or gas across all bases when a base is deleted
+// for minerals pass in 'minerals' for incomeType; for gas pass in 'gas'
+function updateTotalIncomeOnBaseDelete(baseCardId, incomeType) {
+    let baseIncome = getBaseIncome(baseCardId, incomeType);
+    if (incomeType == 'minerals') {
+        totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) - baseIncome;
+    }   else  {
+        totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) - baseIncome;
+    }
+}
+
+// updates vespene gather rate for a single base
 function updateVespeneGatherRate(baseCardId) {
-    let base = document.querySelector(`div#${baseCardId}.base-card`);
+    let base = baseQuerySelector(baseCardId);
     let income = base.querySelector('.gas-income-amount');
-    let vespeneGatherRate = 53;
     let leftIdNum = getBasePosition(baseCardId) * 3 - 2;
     let rightIdNum = getBasePosition(baseCardId) * 3;
-    let leftVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${leftIdNum}`).textContent);
-    let rightVespeneWorkerCount = getNumerator(base.querySelector(`div#worker-counter-${rightIdNum}`).textContent);
+    let leftVespeneWorkerCount = getNumerator(workerCounterQuerySelector(baseCardId, leftIdNum).textContent);
+    let rightVespeneWorkerCount = getNumerator(workerCounterQuerySelector(baseCardId, rightIdNum).textContent);
     income.textContent = (leftVespeneWorkerCount * vespeneGatherRate) + (rightVespeneWorkerCount * vespeneGatherRate);
+}
+
+// updates total vespene across all bases when a worker is added/subtracted
+function updateTotalVespeneGatherRate(flag) {
+    let num = parseInt(totalVespeneCounter.textContent);
+    if (flag == 'up') {
+        num += vespeneGatherRate;
+    }   else  {
+        num -= vespeneGatherRate;
+    }
+    totalVespeneCounter.textContent = num;
 }
 
 function setBaseCardIncome(baseCard, incomeType) {
@@ -246,8 +292,26 @@ function getDenominator(str) {
 
 // returns the position of the base in the list of all bases
 function getBasePosition(baseCardId) {
-    base = document.querySelector(`div#${baseCardId}`);
+    base = baseQuerySelector(baseCardId);
     basesNodeList = base.parentNode;
     let index = Array.prototype.indexOf.call(basesNodeList.children, base);
     return index + 1;
+}
+
+// returns a base's total mineral or vespene income
+// for minerals pass in 'minerals' for incomeType; for gas pass in 'gas'
+function getBaseIncome(baseCardId, incomeType) {
+    base = baseQuerySelector(baseCardId);
+    let income = base.querySelector(`.${incomeType}-income-amount`).textContent;
+    return parseInt(income);
+}
+
+// returns the query selector for a single base card
+function baseQuerySelector(baseCardId) {
+    return document.querySelector(`div#${baseCardId}.base-card`);
+}
+
+// returns the query selector for a single worker counter
+function workerCounterQuerySelector(baseCardId, buttonGroupId) {
+    return document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
 }
