@@ -33,6 +33,48 @@ function createNewBase() {
         setBaseCardButtons(baseCard);
         setBaseCardIncome(baseCard, 'minerals');
         setBaseCardIncome(baseCard, 'gas');
+        setBaseCardSaturateButton(baseCard);
+    }
+}
+
+function setBaseCardSaturateButton(base) {
+    let button = document.createElement('button');
+    button.classList.add('saturate');
+    button.textContent = 'Optimal Saturation';
+    button.addEventListener('click', function() {
+        saturateBase(base);
+    })
+    base.appendChild(button);
+}
+
+// sets a base's workers to optimal saturation (3 on each gas and 16 on minerals)
+function saturateBase(base) {
+    resetBase(base);
+    updateTotalWorkers('up', 22);
+    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE);
+    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2)
+    base.querySelector('.minerals-income-amount').textContent = MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE;
+    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2;
+    let pos = getBasePosition(base.id);
+    for (i = 2; i >= 0; i--) {
+        if (i == 1) {
+            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "16/16";
+        }   else  {
+            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "3/3";
+        }
+    }
+}
+
+// resets a base's worker counts, income, and updates totals at the top of page
+function resetBase(base) {
+    updateTotalWorkers('down', totalWorkersOnBase(base));
+    updateTotalIncomeOnBaseDelete(base.id, 'minerals');
+    updateTotalIncomeOnBaseDelete(base.id, 'gas');
+    base.querySelector('.minerals-income-amount').textContent = 0;
+    base.querySelector('.gas-income-amount').textContent = 0;
+    let pos = getBasePosition(base.id);
+    for (i = 2; i >= 0; i--) {
+        workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "0/0";
     }
 }
 
@@ -208,7 +250,7 @@ function updateTotalMineralGatherRate(workers, flag) {
     totalMineralCounter.textContent = num;
 }
 
-// updates total minerals or gas across all bases when a base is deleted
+// updates total minerals or gas across all bases when a base is deleted/reset
 // for minerals pass in 'minerals' for incomeType; for gas pass in 'gas'
 function updateTotalIncomeOnBaseDelete(baseCardId, incomeType) {
     let baseIncome = getBaseIncome(baseCardId, incomeType);
