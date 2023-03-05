@@ -7,7 +7,7 @@ body {
     background-repeat: repeat;
 }
 
-.top-stats * {
+.top-stats *, label {
     color: white;
 }
 
