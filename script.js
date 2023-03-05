@@ -27,8 +27,9 @@ function createNewBase() {
         updateTotalBases('up', 1);
         baseCard.id = "base-" + totalBases();
         document.querySelector('.base-wrapper').appendChild(baseCard);
+        let race = document.querySelector('#race').value;
     
-        setBaseCardIcons();
+        setBaseCardIcons(race);
         setBaseCardWorkerCounters(baseCard);
         setBaseCardButtons(baseCard);
         setBaseCardIncome(baseCard, 'minerals');
@@ -103,18 +104,18 @@ function resetBases() {
     }
 }
 
-function setBaseCardIcons() {
+function setBaseCardIcons(race) {
     let baseBuildingIcon = document.createElement('img');
     baseBuildingIcon.classList.add('wire-frame');
-    baseBuildingIcon.setAttribute('src', 'assets/wireframe-terran-commandcenter.png');
+    baseBuildingIcon.setAttribute('src', `assets/wireframe-${race}-base.png`);
     
     let vespeneBuildingIcon1 = document.createElement('img');
     vespeneBuildingIcon1.classList.add('wire-frame');
-    vespeneBuildingIcon1.setAttribute('src', 'assets/wireframe-terran-refinery.png');
+    vespeneBuildingIcon1.setAttribute('src', `assets/wireframe-${race}-gas.png`);
 
     let vespeneBuildingIcon2 = document.createElement('img');
     vespeneBuildingIcon2.classList.add('wire-frame');
-    vespeneBuildingIcon2.setAttribute('src', 'assets/wireframe-terran-refinery.png');
+    vespeneBuildingIcon2.setAttribute('src', `assets/wireframe-${race}-gas.png`);
 
     document.querySelector('.base-wrapper').lastChild.appendChild(vespeneBuildingIcon1);
     document.querySelector('.base-wrapper').lastChild.appendChild(baseBuildingIcon);
