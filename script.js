@@ -7,6 +7,8 @@ const OPTIMAL_MINERAL_GATHER_RATE = 59;
 const SUBOPTIMAL_MINERAL_GATHER_RATE = 25;
 const VESPENE_GATHER_RATE = 53;
 
+let raceSelect = document.querySelector('#race')
+raceSelect.addEventListener("change", updateBaseCardIcons);
 let createBaseButton = document.getElementById("create-base");
 createBaseButton.addEventListener("click", createNewBase);
 let deleteBaseButton = document.getElementById("delete-base");
@@ -27,7 +29,7 @@ function createNewBase() {
         updateTotalBases('up', 1);
         baseCard.id = "base-" + totalBases();
         document.querySelector('.base-wrapper').appendChild(baseCard);
-        let race = document.querySelector('#race').value;
+        let race = raceSelect.value;
     
         setBaseCardIcons(race);
         setBaseCardWorkerCounters(baseCard);
@@ -120,6 +122,21 @@ function setBaseCardIcons(race) {
     document.querySelector('.base-wrapper').lastChild.appendChild(vespeneBuildingIcon1);
     document.querySelector('.base-wrapper').lastChild.appendChild(baseBuildingIcon);
     document.querySelector('.base-wrapper').lastChild.appendChild(vespeneBuildingIcon2);
+}
+
+function updateBaseCardIcons() {
+    let race = raceSelect.value
+    let baseCards = document.querySelectorAll('.base-card');
+    baseCards.forEach(baseCard => {
+        let childNodes = baseCard.children;
+        for (i = 0; i < 3; i++) {
+            if (i % 2 == 0) {
+                childNodes[i].setAttribute('src', `assets/wireframe-${race}-gas.png`);
+            }   else  {
+                childNodes[i].setAttribute('src', `assets/wireframe-${race}-base.png`);
+            }
+        }
+    })
 }
 
 function setBaseCardWorkerCounters(baseCard) {
