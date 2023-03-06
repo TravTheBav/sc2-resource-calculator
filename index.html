@@ -8,29 +8,33 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <label for="race">Choose your race:</label>
-    <select name="race" id="race">
-        <option value="terran">Terran</option>
-        <option value="zerg">Zerg</option>
-        <option value="protoss">Protoss</option>
-    </select>
-
-    <button id="create-base">Create Base</button>
-    <button id="delete-base">Delete Base</button>
-    <button id="reset">Reset</button>
-    <div class="top-stats">
-        <p>Total Workers: <span class="total-worker-counter">0</span></p>
-    </div>
-    <div class="top-stats">
-        <p>Total Bases: <span class="total-base-counter">0</span></p>
-    </div>
-    <div class="top-stats">
-        <p>Total Minerals Per Minute: <span class="total-mineral-counter">0</span></p>
-    </div>
-    <div class="top-stats">
-        <p>Total Gas Per Minute: <span class="total-vespene-counter">0</span></p>
-    </div>
+    <header>Starcraft 2 Resource Calculator</header>
     <div class="base-wrapper"></div>
+    <div class="side-bar">
+        <label for="race">Choose your race:</label>
+        <select name="race" id="race">
+            <option value="terran">Terran</option>
+            <option value="zerg">Zerg</option>
+            <option value="protoss">Protoss</option>
+        </select>
+    
+        <button id="create-base">Create Base</button>
+        <button id="delete-base">Delete Base</button>
+        <button id="reset">Reset</button>
+        <div class="top-stats">
+            <p>Total Workers: <span class="total-worker-counter">0</span></p>
+        </div>
+        <div class="top-stats">
+            <p>Total Bases: <span class="total-base-counter">0</span></p>
+        </div>
+        <div class="top-stats">
+            <p>Total Minerals Per Minute: <span class="total-mineral-counter">0</span></p>
+        </div>
+        <div class="top-stats">
+            <p>Total Gas Per Minute: <span class="total-vespene-counter">0</span></p>
+        </div>
+    </div>    
+    
     <script src="script.js"></script>
 </body>
 </html>

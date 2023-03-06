@@ -1,10 +1,39 @@
 html, body {
     width: 100%;
+    margin: 0px;
 }
 
 body {
     background-image: url("assets/ui_screens_default_nebula01.png");
     background-repeat: repeat;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 100px auto;
+}
+
+header {
+    background-color: rgb(110, 15, 142);
+    color: white;
+    text-align: center;
+    font-size: xx-large;
+    line-height: 100px;
+    grid-column: 1 / 5;
+    grid-row: 1 / 2;
+}
+
+.side-bar {
+    grid-column: 4 / 5;
+    grid-row-start: 2;
+    padding: 10px;
+}
+
+.base-wrapper {
+    padding: 10px;
+    grid-column: 1 / 4;
+    grid-row-start: 2;
+    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 452px);
 }
 
 .top-stats *, label {
@@ -12,12 +41,13 @@ body {
 }
 
 .base-card {
+    width: 452px;
+    height: 324px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: fit-content;
     background-color: rgba(0, 255, 34, 0.15);
-    padding: 10px;
-    margin: 10px;
+    padding: 8px;
     gap: 4px;
     border: 2px dashed rgba(0, 255, 34);
     border-radius: 8px;
