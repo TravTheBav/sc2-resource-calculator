@@ -16,26 +16,26 @@ body {
     width: 100vw;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 100px 1fr;
+    grid-template-rows: 60px 1fr;
 }
 
 .header {
     background-color: rgb(94, 11, 145);
     text-align: center;
-    font-size: xx-large;
-    line-height: 100px;
+    font-size: large;
+    line-height: 60px;
 }
 
 .body {
     display: grid;
-    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 1fr 2fr;
     overflow: hidden;
 }
 
 .side-bar {
     background-color: rgba(110, 15, 142, 0.3);
     padding: 10px;
-    font-size: x-large;
+    font-size: medium;
 }
 
 .race-select {
@@ -46,14 +46,14 @@ body {
 
 select#race {
     margin-left: 10px;
-    font-size: large;
+    font-size: medium;
     max-height: 2rem;
 }
 
 .side-bar .buttons {
     display: flex;
     flex-direction: column;
-    width: max(40%, 100px);
+    width: min(40%, 100px);
     gap: 1rem;
 }
 
@@ -61,9 +61,9 @@ button {
     border: none;
     background-color: darkgreen;
     border-radius: 4px;
-    font-size: large;
+    font-size: medium;
     color: white;
-    padding: 4px 0px;
+    padding: 4px 4px;
 }
 
 .up-down-buttons button, button.saturate {
@@ -74,7 +74,7 @@ button {
 .base-wrapper {
     overflow-y: scroll;
     padding: 10px;
-    gap: 10px;
+    gap: 1rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, 452px);
 }
@@ -124,4 +124,32 @@ button {
 .up-down-buttons button {
     font-size: larger;
     width: 2rem;
+}
+
+@media only screen and (min-width: 801px) {
+    .container {
+        grid-template-rows: 100px 1fr;
+    }
+    
+    .header {
+        font-size: xx-large;
+        line-height: 100px;
+    }
+    
+    .body {
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr 4fr;
+    }
+
+    .side-bar {
+        font-size: x-large;
+    }
+
+    button {
+        font-size: large;
+    }
+
+    select#race {
+        font-size: large;
+    }
 }
