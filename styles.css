@@ -89,7 +89,7 @@ button {
     padding: 4px 4px;
 }
 
-.up-down-buttons button, button.saturate {
+.up-down-buttons button, button.saturate, button.mineral-node {
     background-color: rgba(121, 36, 150, 0.8);
     border: 1px solid white;
 }
@@ -123,6 +123,11 @@ button {
 .wrapper.gas-income {
     grid-row: 5 / 6;
     grid-column: 1 / 4;
+}
+
+button.saturate {
+    grid-row: 6 / 7;
+    grid-column: 3 / 4;
 }
 
 img.wire-frame {

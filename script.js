@@ -1,5 +1,6 @@
 const MAX_WORKERS = 200;
 const MAX_BASES = 8;
+const MAX_MINERAL_NODES = 12;
 const MINERAL_OPTIMAL_SATURATION = 16;
 const MINERAL_SUBOPTIMAL_SATURATION = 24;
 const VESPENE_OPTIMAL_SATURATION = 3;
@@ -33,17 +34,46 @@ function createNewBase() {
     
         setBaseCardIcons(race);
         setBaseCardWorkerCounters(baseCard);
-        setBaseCardButtons(baseCard);
+        setBaseCardWorkerButtons(baseCard);
         setBaseCardIncome(baseCard, 'minerals');
         setBaseCardIncome(baseCard, 'gas');
+        setBaseCardMineralNodeButtons(baseCard);
         setBaseCardSaturateButton(baseCard);
+    }
+}
+
+function setBaseCardMineralNodeButtons(base) {
+    let upButton = document.createElement('button');
+    let downButton = document.createElement('button');
+    upButton.textContent = '+ node';
+    upButton.classList.add('mineral-node');
+    upButton.classList.add('up');
+    upButton.addEventListener('click', mineralNodeButtonClick);
+    downButton.textContent = '- node';
+    downButton.classList.add('mineral-node');
+    downButton.classList.add('down');
+    downButton.addEventListener('click', mineralNodeButtonClick);
+    base.appendChild(upButton);
+    base.appendChild(downButton);
+}
+
+function mineralNodeButtonClick() {
+    let mineralWorkerCounter = this.parentNode.querySelector('.worker-counter.minerals');
+    let currentWorkers = getNumerator(mineralWorkerCounter.textContent);
+    let maxWorkers = getDenominator(mineralWorkerCounter.textContent);
+    if (this.classList.contains('up') && maxWorkers < MAX_MINERAL_NODES * 2) {
+        let str = `${currentWorkers}/${maxWorkers + 2}`;
+        mineralWorkerCounter.textContent = str;
+    }   else if (this.classList.contains('down') && maxWorkers > 0) {
+        let str = `${currentWorkers}/${maxWorkers - 2}`;
+        mineralWorkerCounter.textContent = str;
     }
 }
 
 function setBaseCardSaturateButton(base) {
     let button = document.createElement('button');
     button.classList.add('saturate');
-    button.textContent = 'Optimal Saturation';
+    button.textContent = 'saturate';
     button.addEventListener('click', function() {
         saturateBase(base);
     })
@@ -149,6 +179,7 @@ function setBaseCardWorkerCounters(baseCard) {
     
     let mineralWorkerCounter = document.createElement('div');
     mineralWorkerCounter.classList.add('worker-counter');
+    mineralWorkerCounter.classList.add('minerals');
     mineralWorkerCounter.id = "worker-counter-" + (startIdx + 1).toString();
     mineralWorkerCounter.textContent = "0/16";
 
@@ -162,7 +193,7 @@ function setBaseCardWorkerCounters(baseCard) {
     baseCard.appendChild(rightVespeneWorkerCounter);
 }
 
-function setBaseCardButtons(baseCard) {
+function setBaseCardWorkerButtons(baseCard) {
     for (let i = (totalBases() * 3) - 2; i < (totalBases() * 3) + 1; i++) {
         let buttonGroup = document.createElement('div');
         buttonGroup.classList.add('up-down-buttons');
@@ -193,13 +224,13 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         numerator--;
         updateTotalWorkers('down', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == MINERAL_OPTIMAL_SATURATION) {
-            updateMineralGatherRate(numerator, baseCardId);
-            updateTotalMineralGatherRate(numerator, 'down');
-        }   else {
+        if (denominator == 3) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('down');
-        }        
+        }   else  {
+            updateMineralGatherRate(numerator, baseCardId);
+            updateTotalMineralGatherRate(numerator, 'down');
+        }   
     }
 }
 
@@ -208,35 +239,30 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
     let denominator = getDenominator(str);
-    if (validWorkerUpClick(numerator, denominator)) {
+    if (validWorkerUpClick()) {
         numerator++;
         updateTotalWorkers('up', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == MINERAL_OPTIMAL_SATURATION) {
-            updateMineralGatherRate(numerator, baseCardId);
-            updateTotalMineralGatherRate(numerator, 'up');
-        }   else {
+        if (denominator == 3) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('up');
-        }        
+        }   else  {
+            updateMineralGatherRate(numerator, baseCardId);
+            updateTotalMineralGatherRate(numerator, 'up');
+        }
     }    
 }
 
 function validWorkerDownClick(numerator) {
     if (numerator > 0) {
         return true;
-    }   else {
-        return false;
     }
+    return false;
 }
 
-function validWorkerUpClick(numerator, denominator) {
+function validWorkerUpClick() {
     if (totalWorkers() < MAX_WORKERS) {
-        if ((denominator == MINERAL_OPTIMAL_SATURATION) && (numerator < MINERAL_SUBOPTIMAL_SATURATION)) {
-            return true;
-        }   else if ((denominator == VESPENE_OPTIMAL_SATURATION) && (numerator < VESPENE_OPTIMAL_SATURATION)) {
-            return true;
-        }
+        return true;
     }
     return false;    
 }
