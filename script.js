@@ -80,26 +80,6 @@ function setBaseCardSaturateButton(base) {
     base.appendChild(button);
 }
 
-// sets a base's workers to optimal saturation (3 on each gas and 16 on minerals)
-// OLD FUNCTION
-//function saturateBase(base) {
-//    resetBase(base);
-//    updateTotalWorkers('up', 22);
-//    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE);
-//    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2);
-//    base.querySelector('.minerals-income-amount').textContent = MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE;
-//    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2;
-//    let pos = getBasePosition(base.id);
-//    for (i = 2; i >= 0; i--) {
-//        if (i == 1) {
-//            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "16/16";
-//        }   else  {
-//            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "3/3";
-//        }
-//    }
-//}
-
-// NEW FUNCTION
 function saturateBase(base) {
     let maxMineralWorkers = getDenominator(mineralWorkerCounterQuerySelector(base.id).textContent);
     resetBase(base);
@@ -117,8 +97,6 @@ function saturateBase(base) {
         }
     }
 }
-
-
 
 // resets a base's worker counts, income, and updates totals at the top of page
 function resetBase(base) {
@@ -246,10 +224,12 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         numerator--;
         updateTotalWorkers('down', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == 3) {
+        if (denominator == 3 && numerator < 3) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('down');
-        }   else  {
+        }  else if (denominator == 3 && numerator >= 3) {
+            return;
+        }  else  {
             updateMineralGatherRate(numerator, baseCardId, denominator);
             updateTotalMineralGatherRate(numerator, 'down', denominator);
         }   
@@ -265,10 +245,12 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         numerator++;
         updateTotalWorkers('up', 1);
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
-        if (denominator == 3) {
+        if (denominator == 3 && numerator <= 3) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('up');
-        }   else  {
+        }  else if (denominator == 3 && numerator > 3)  {
+            return;
+        }  else  {
             updateMineralGatherRate(numerator, baseCardId, denominator);
             updateTotalMineralGatherRate(numerator, 'up', denominator);
         }
