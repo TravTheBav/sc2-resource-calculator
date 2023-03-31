@@ -81,22 +81,44 @@ function setBaseCardSaturateButton(base) {
 }
 
 // sets a base's workers to optimal saturation (3 on each gas and 16 on minerals)
+// OLD FUNCTION
+//function saturateBase(base) {
+//    resetBase(base);
+//    updateTotalWorkers('up', 22);
+//    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE);
+//    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2);
+//    base.querySelector('.minerals-income-amount').textContent = MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE;
+//    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2;
+//    let pos = getBasePosition(base.id);
+//    for (i = 2; i >= 0; i--) {
+//        if (i == 1) {
+//            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "16/16";
+//        }   else  {
+//            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "3/3";
+//        }
+//    }
+//}
+
+// NEW FUNCTION
 function saturateBase(base) {
+    let maxMineralWorkers = getDenominator(mineralWorkerCounterQuerySelector(base.id).textContent);
     resetBase(base);
-    updateTotalWorkers('up', 22);
-    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE);
-    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2)
-    base.querySelector('.minerals-income-amount').textContent = MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE;
+    updateTotalWorkers('up', (6 + maxMineralWorkers));  // 6 for total vespene workers plus 2 * each mineral node
+    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE);
+    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2);
+    base.querySelector('.minerals-income-amount').textContent = maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE;
     base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2;
     let pos = getBasePosition(base.id);
     for (i = 2; i >= 0; i--) {
         if (i == 1) {
-            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "16/16";
+            workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = `${maxMineralWorkers}/${maxMineralWorkers}`;
         }   else  {
             workerCounterQuerySelector(base.id, (pos * 3) - i).textContent = "3/3";
         }
     }
 }
+
+
 
 // resets a base's worker counts, income, and updates totals at the top of page
 function resetBase(base) {
@@ -228,8 +250,8 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('down');
         }   else  {
-            updateMineralGatherRate(numerator, baseCardId);
-            updateTotalMineralGatherRate(numerator, 'down');
+            updateMineralGatherRate(numerator, baseCardId, denominator);
+            updateTotalMineralGatherRate(numerator, 'down', denominator);
         }   
     }
 }
@@ -247,8 +269,8 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
             updateVespeneGatherRate(baseCardId);
             updateTotalVespeneGatherRate('up');
         }   else  {
-            updateMineralGatherRate(numerator, baseCardId);
-            updateTotalMineralGatherRate(numerator, 'up');
+            updateMineralGatherRate(numerator, baseCardId, denominator);
+            updateTotalMineralGatherRate(numerator, 'up', denominator);
         }
     }    
 }
@@ -268,27 +290,35 @@ function validWorkerUpClick() {
 }
 
 // updates mineral gather rate for a single base
-function updateMineralGatherRate(workers, baseCardId) {
+function updateMineralGatherRate(workers, baseCardId, denominator) {
+    if (denominator == 0) {
+        return;  // no need to calculate the mineral gather rate if there are no minerals!
+    }
+    
     let base = baseQuerySelector(baseCardId);
     let currentIncome = base.querySelector('.minerals-income-amount');
-    if (workers <= MINERAL_OPTIMAL_SATURATION) {
+    if (workers <= denominator) {   // up to 2 workers per node
         currentIncome.textContent = workers * OPTIMAL_MINERAL_GATHER_RATE;
-    }   else if (workers <= MINERAL_SUBOPTIMAL_SATURATION) {
-        currentIncome.textContent = (MINERAL_OPTIMAL_SATURATION * OPTIMAL_MINERAL_GATHER_RATE) +
-                                    ((workers - MINERAL_OPTIMAL_SATURATION) * SUBOPTIMAL_MINERAL_GATHER_RATE);
+    }   else if (workers <= (denominator * 1.5)) {  // when there is a least one mineral patch with 3 workers
+        currentIncome.textContent = (denominator * OPTIMAL_MINERAL_GATHER_RATE) +
+                                    ((workers - denominator) * SUBOPTIMAL_MINERAL_GATHER_RATE);
     }
 }
 
 // updates total minerals across all bases when a worker is added/subtracted
-function updateTotalMineralGatherRate(workers, flag) {
+function updateTotalMineralGatherRate(workers, flag, denominator) {
+    if (denominator == 0) {
+        return;  // no need to calculate the mineral gather rate if there are no minerals
+    }
+
     let num = parseInt(totalMineralCounter.textContent);
-    if (workers <= MINERAL_OPTIMAL_SATURATION && flag == 'up') {
+    if (workers <= denominator && flag == 'up') {
         num += OPTIMAL_MINERAL_GATHER_RATE;
-    }   else if (workers <= SUBOPTIMAL_MINERAL_GATHER_RATE && flag == 'up') {
+    }   else if (workers <= (denominator * 1.5) && flag == 'up') {
         num += SUBOPTIMAL_MINERAL_GATHER_RATE;
-    }   else if (workers < MINERAL_OPTIMAL_SATURATION && flag == 'down') {
+    }   else if (workers < denominator && flag == 'down') {
         num -= OPTIMAL_MINERAL_GATHER_RATE;
-    }   else  {
+    }   else if (workers < (denominator * 1.5) && flag == 'down')  {
         num -= SUBOPTIMAL_MINERAL_GATHER_RATE;
     }
     totalMineralCounter.textContent = num;
@@ -413,4 +443,9 @@ function baseQuerySelector(baseCardId) {
 // returns the query selector for a single worker counter
 function workerCounterQuerySelector(baseCardId, buttonGroupId) {
     return document.querySelector(`div#${baseCardId}.base-card div#worker-counter-${buttonGroupId}.worker-counter`);
+}
+
+// returns the query selector for the minerals worker counter
+function mineralWorkerCounterQuerySelector(baseCardId) {
+    return baseQuerySelector(baseCardId).querySelector('.worker-counter.minerals');
 }
