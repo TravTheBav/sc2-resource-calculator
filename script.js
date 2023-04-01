@@ -1,8 +1,6 @@
 const MAX_WORKERS = 200;
 const MAX_BASES = 8;
 const MAX_MINERAL_NODES = 12;
-const MINERAL_OPTIMAL_SATURATION = 16;
-const MINERAL_SUBOPTIMAL_SATURATION = 24;
 const VESPENE_OPTIMAL_SATURATION = 3;
 const OPTIMAL_MINERAL_GATHER_RATE = 59;
 const SUBOPTIMAL_MINERAL_GATHER_RATE = 25;
@@ -60,14 +58,20 @@ function setBaseCardMineralNodeButtons(base) {
 function mineralNodeButtonClick() {
     let mineralWorkerCounter = this.parentNode.querySelector('.worker-counter.minerals');
     let currentWorkers = getNumerator(mineralWorkerCounter.textContent);
-    let maxWorkers = getDenominator(mineralWorkerCounter.textContent);
-    if (this.classList.contains('up') && maxWorkers < MAX_MINERAL_NODES * 2) {
-        let str = `${currentWorkers}/${maxWorkers + 2}`;
-        mineralWorkerCounter.textContent = str;
-    }   else if (this.classList.contains('down') && maxWorkers > 0) {
-        let str = `${currentWorkers}/${maxWorkers - 2}`;
-        mineralWorkerCounter.textContent = str;
+    let previousMaxWorkers = getDenominator(mineralWorkerCounter.textContent);
+    let baseCardId = this.parentNode.id;
+    let previousBaseIncome = getBaseIncome(baseCardId, 'minerals');
+    if (this.classList.contains('up') && previousMaxWorkers < MAX_MINERAL_NODES * 2) {
+        mineralWorkerCounter.textContent = `${currentWorkers}/${previousMaxWorkers + 2}`;
+    }   else if (this.classList.contains('down') && previousMaxWorkers > 0) {
+        mineralWorkerCounter.textContent = `${currentWorkers}/${previousMaxWorkers - 2}`;
+    }   else  {
+        return;
     }
+    let newMaxWorkers = getDenominator(mineralWorkerCounter.textContent);
+    updateMineralGatherRate(currentWorkers, baseCardId, newMaxWorkers);
+    let newBaseIncome = getBaseIncome(baseCardId, 'minerals');
+    totalMineralCounter.textContent = totalMineralsGatherRate() - previousBaseIncome + newBaseIncome;
 }
 
 function setBaseCardSaturateButton(base) {
@@ -272,19 +276,25 @@ function validWorkerUpClick() {
 }
 
 // updates mineral gather rate for a single base
-function updateMineralGatherRate(workers, baseCardId, denominator) {
-    if (denominator == 0) {
-        return;  // no need to calculate the mineral gather rate if there are no minerals!
-    }
-    
+function updateMineralGatherRate(workers, baseCardId, denominator) {    
     let base = baseQuerySelector(baseCardId);
     let currentIncome = base.querySelector('.minerals-income-amount');
-    if (workers <= denominator) {   // up to 2 workers per node
-        currentIncome.textContent = workers * OPTIMAL_MINERAL_GATHER_RATE;
-    }   else if (workers <= (denominator * 1.5)) {  // when there is a least one mineral patch with 3 workers
-        currentIncome.textContent = (denominator * OPTIMAL_MINERAL_GATHER_RATE) +
-                                    ((workers - denominator) * SUBOPTIMAL_MINERAL_GATHER_RATE);
+    if (denominator == 0) {
+        currentIncome.textContent = 0;
+        return;
     }
+
+    let int = 0;
+    for (i = 0; i < workers; i++) {
+        if (i < denominator) {
+            int += OPTIMAL_MINERAL_GATHER_RATE;
+        }   else if (i < denominator * 1.5) {
+            int += SUBOPTIMAL_MINERAL_GATHER_RATE;
+        }   else  {
+            break;
+        }
+    }
+    currentIncome.textContent = int;
 }
 
 // updates total minerals across all bases when a worker is added/subtracted
@@ -378,6 +388,10 @@ function totalWorkers() {
 
 function totalBases() {
     return parseInt(totalBaseCounter.textContent);
+}
+
+function totalMineralsGatherRate() {
+    return parseInt(totalMineralCounter.textContent);
 }
 
 // returns all workers at a given base
