@@ -96,10 +96,6 @@ button {
     box-shadow: inset 0 0 2px 1px rgb(120, 140, 214);
 }
 
-button:hover {
-    box-shadow: inset 0 0 8px 1px rgb(246, 246, 247);
-}
-
 button:active {
     box-shadow: inset 0 0 8px 1px black;
 }
@@ -250,5 +246,11 @@ img.wire-frame {
 
     .worker-counter {
         font-size: xx-large;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    button:hover {
+        box-shadow: inset 0 0 8px 1px rgb(246, 246, 247);
     }
 }
