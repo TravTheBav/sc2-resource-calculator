@@ -1,2 +1,2 @@
 # sc2-resource-calculator
-An interactive tool to view mineral and gas income based on amount of workers and bases
+An interactive tool to calculate your total income for a game of Starcraft 2.
