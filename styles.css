@@ -3,6 +3,7 @@ html, body {
     margin: 0px;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     color: white;
+    --SC-blue: 10, 50, 170;
 }
 
 a {
@@ -24,7 +25,7 @@ body {
 }
 
 .header {
-    background-color: rgb(94, 11, 145);
+    background-image: linear-gradient(to bottom left, rgb(5, 1, 47), rgba(var(--SC-blue), 1.0), rgb(93, 93, 234));
     text-align: center;
     font-size: min(max(1rem, 6vw), 24px);
     line-height: 60px;
@@ -37,7 +38,7 @@ body {
 }
 
 .side-bar {
-    background-color: rgba(110, 15, 142, 0.3);
+    background-color: rgba(var(--SC-blue), 0.3);
     padding: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -81,8 +82,9 @@ select#race {
 }
 
 button {
-    border: none;
+    border: 1px solid white;
     background-color: darkgreen;
+    box-shadow: inset 0 0 2px 1px rgb(55, 176, 55);
     border-radius: 4px;
     font-size: medium;
     color: white;
@@ -90,8 +92,16 @@ button {
 }
 
 .up-down-buttons button, button.saturate, button.mineral-node {
-    background-color: rgba(121, 36, 150, 0.8);
-    border: 1px solid white;
+    background-color: rgb(var(--SC-blue));
+    box-shadow: inset 0 0 2px 1px rgb(120, 140, 214);
+}
+
+button:hover {
+    box-shadow: inset 0 0 8px 1px rgb(246, 246, 247);
+}
+
+button:active {
+    box-shadow: inset 0 0 8px 1px black;
 }
 
 .base-wrapper {
