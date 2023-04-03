@@ -37,6 +37,48 @@ function createNewBase() {
         setBaseCardIncome(baseCard, 'gas');
         setBaseCardMineralNodeButtons(baseCard);
         setBaseCardSaturateButton(baseCard);
+        setBaseCardResourceToggleButtons(baseCard);
+    }
+}
+
+function setBaseCardResourceToggleButtons(base) {
+    let container = document.createElement('div');
+    container.classList.add('resource-toggle-buttons');
+    
+    let mineralTypeButton = document.createElement('button');
+    mineralTypeButton.classList.add('mineral-type');
+    mineralTypeButton.setAttribute('value', 'normal');
+    mineralTypeButton.addEventListener('click', mineralTypeToggle);
+    
+    let gasTypeButton = document.createElement('button');
+    gasTypeButton.classList.add('gas-type');
+    gasTypeButton.setAttribute('value', 'normal');
+    gasTypeButton.addEventListener('click', gasTypeToggle);
+    
+    container.appendChild(mineralTypeButton);
+    container.appendChild(gasTypeButton);
+    base.appendChild(container);
+}
+
+function mineralTypeToggle() {
+    let value = this.getAttribute('value');
+    if (value == 'normal') {
+        this.style["background-image"] = "url('assets/ui_emoticons_gminerals.png')";
+        this.setAttribute('value', 'gold');
+    }   else  {
+        this.style["background-image"] = "url('assets/ui_emoticons_minerals.png')";
+        this.setAttribute('value', 'normal');
+    }
+}
+
+function gasTypeToggle() {
+    let value = this.getAttribute('value');
+    if (value == 'normal') {
+        this.style["background-image"] = "url('assets/ui_emoticons_rich_gas.png')";
+        this.setAttribute('value', 'rich');
+    }   else  {
+        this.style["background-image"] = "url('assets/ui_emoticons_gas.png')";
+        this.setAttribute('value', 'normal');
     }
 }
 

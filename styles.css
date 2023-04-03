@@ -91,7 +91,8 @@ button {
     padding: 4px 4px;
 }
 
-.up-down-buttons button, button.saturate, button.mineral-node {
+.up-down-buttons button, button.saturate, button.mineral-node,
+button.mineral-type, button.gas-type {
     background-color: rgb(var(--SC-blue));
     box-shadow: inset 0 0 2px 1px rgb(120, 140, 214);
 }
@@ -134,6 +135,26 @@ button:active {
 button.saturate {
     grid-row: 6 / 7;
     grid-column: 3 / 4;
+}
+
+.resource-toggle-buttons {
+    grid-row: 7 / 8;
+    grid-column: 1 / 2;
+    display: flex;
+    gap: 4px;
+}
+
+.resource-toggle-buttons * {
+    width: 32px;
+    height: 32px;
+}
+
+button.mineral-type {
+    background-image: url("assets/ui_emoticons_minerals.png");
+}
+
+button.gas-type {
+    background-image: url("assets/ui_emoticons_gas.png");
 }
 
 img.wire-frame {
