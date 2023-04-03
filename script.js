@@ -142,12 +142,14 @@ function setBaseCardSaturateButton(base) {
 
 function saturateBase(base) {
     let maxMineralWorkers = getDenominator(mineralWorkerCounterQuerySelector(base.id).textContent);
+    let mineralsType = base.getAttribute('minerals-type');
+    let gasType = base.getAttribute('gas-type');
     resetBase(base);
     updateTotalWorkers('up', (6 + maxMineralWorkers));  // 6 for total vespene workers plus 2 * each mineral node
-    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE);
-    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * OPTIMAL_VESPENE_GATHER_RATE) * 2);
-    base.querySelector('.minerals-income-amount').textContent = maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE;
-    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * OPTIMAL_VESPENE_GATHER_RATE) * 2;
+    totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (maxMineralWorkers * gatherRates[`${mineralsType}Optimal`]);
+    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + (gatherRates[`${gasType}Optimal`] * 4) + (gatherRates[`${gasType}Suboptimal`] * 2);
+    base.querySelector('.minerals-income-amount').textContent = maxMineralWorkers * gatherRates[`${mineralsType}Optimal`];
+    base.querySelector('.gas-income-amount').textContent = (gatherRates[`${gasType}Optimal`] * 4) + (gatherRates[`${gasType}Suboptimal`] * 2);
     let pos = getBasePosition(base.id);
     for (i = 2; i >= 0; i--) {
         if (i == 1) {
