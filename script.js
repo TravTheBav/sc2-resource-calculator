@@ -2,9 +2,21 @@ const MAX_WORKERS = 200;
 const MAX_BASES = 8;
 const MAX_MINERAL_NODES = 12;
 const VESPENE_OPTIMAL_SATURATION = 3;
-const OPTIMAL_MINERAL_GATHER_RATE = 59;
-const SUBOPTIMAL_MINERAL_GATHER_RATE = 25;
-const VESPENE_GATHER_RATE = 53;
+const OPTIMAL_MINERAL_GATHER_RATE = 58;
+const SUBOPTIMAL_MINERAL_GATHER_RATE = 27;
+const OPTIMAL_VESPENE_GATHER_RATE = 61;
+const SUBOPTIMAL_VESPENE_GATHER_RATE = 40;
+
+let gatherRates = {
+    mineralsOptimal: 58,
+    mineralsSuboptimal: 27,
+    goldMineralsOptimal: 83,
+    goldMineralsSuboptimal: 34,
+    vespeneOptimal: 61,
+    vespeneSuboptimal: 40,
+    richVespeneOptimal: 122,
+    richVespeneSuboptimal: 80
+}
 
 let raceSelect = document.querySelector('#race')
 raceSelect.addEventListener("change", updateBaseCardIcons);
@@ -25,6 +37,8 @@ function createNewBase() {
     if (totalBases() < MAX_BASES) {
         let baseCard = document.createElement('div');
         baseCard.classList.add('base-card');
+        baseCard.setAttribute('minerals-type', 'minerals');
+        baseCard.setAttribute('gas-type', 'vespene');
         updateTotalBases('up', 1);
         baseCard.id = "base-" + totalBases();
         document.querySelector('.base-wrapper').appendChild(baseCard);
@@ -47,12 +61,10 @@ function setBaseCardResourceToggleButtons(base) {
     
     let mineralTypeButton = document.createElement('button');
     mineralTypeButton.classList.add('mineral-type');
-    mineralTypeButton.setAttribute('value', 'normal');
     mineralTypeButton.addEventListener('click', mineralTypeToggle);
     
     let gasTypeButton = document.createElement('button');
     gasTypeButton.classList.add('gas-type');
-    gasTypeButton.setAttribute('value', 'normal');
     gasTypeButton.addEventListener('click', gasTypeToggle);
     
     container.appendChild(mineralTypeButton);
@@ -61,24 +73,26 @@ function setBaseCardResourceToggleButtons(base) {
 }
 
 function mineralTypeToggle() {
-    let value = this.getAttribute('value');
-    if (value == 'normal') {
+    let base = this.parentNode.parentNode;
+    let value = base.getAttribute('minerals-type');
+    if (value == 'minerals') {
         this.style["background-image"] = "url('assets/ui_emoticons_gminerals.png')";
-        this.setAttribute('value', 'gold');
+        base.setAttribute('minerals-type', 'goldMinerals');
     }   else  {
         this.style["background-image"] = "url('assets/ui_emoticons_minerals.png')";
-        this.setAttribute('value', 'normal');
+        base.setAttribute('minerals-type', 'minerals');
     }
 }
 
 function gasTypeToggle() {
-    let value = this.getAttribute('value');
-    if (value == 'normal') {
+    let base = this.parentNode.parentNode;
+    let value = base.getAttribute('gas-type');
+    if (value == 'vespene') {
         this.style["background-image"] = "url('assets/ui_emoticons_rich_gas.png')";
-        this.setAttribute('value', 'rich');
+        base.setAttribute('gas-type', 'richVespene');
     }   else  {
         this.style["background-image"] = "url('assets/ui_emoticons_gas.png')";
-        this.setAttribute('value', 'normal');
+        base.setAttribute('gas-type', 'vespene');
     }
 }
 
@@ -131,9 +145,9 @@ function saturateBase(base) {
     resetBase(base);
     updateTotalWorkers('up', (6 + maxMineralWorkers));  // 6 for total vespene workers plus 2 * each mineral node
     totalMineralCounter.textContent = parseInt(totalMineralCounter.textContent) + (maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE);
-    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2);
+    totalVespeneCounter.textContent = parseInt(totalVespeneCounter.textContent) + ((VESPENE_OPTIMAL_SATURATION * OPTIMAL_VESPENE_GATHER_RATE) * 2);
     base.querySelector('.minerals-income-amount').textContent = maxMineralWorkers * OPTIMAL_MINERAL_GATHER_RATE;
-    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * VESPENE_GATHER_RATE) * 2;
+    base.querySelector('.gas-income-amount').textContent = (VESPENE_OPTIMAL_SATURATION * OPTIMAL_VESPENE_GATHER_RATE) * 2;
     let pos = getBasePosition(base.id);
     for (i = 2; i >= 0; i--) {
         if (i == 1) {
@@ -220,6 +234,7 @@ function setBaseCardWorkerCounters(baseCard) {
 
     let leftVespeneWorkerCounter = document.createElement('div');
     leftVespeneWorkerCounter.classList.add('worker-counter');
+    leftVespeneWorkerCounter.classList.add('gas');
     leftVespeneWorkerCounter.id = "worker-counter-" + startIdx;
     leftVespeneWorkerCounter.textContent = "0/3";
     
@@ -231,6 +246,7 @@ function setBaseCardWorkerCounters(baseCard) {
 
     let rightVespeneWorkerCounter = document.createElement('div');
     rightVespeneWorkerCounter.classList.add('worker-counter');
+    rightVespeneWorkerCounter.classList.add('gas');
     rightVespeneWorkerCounter.id = "worker-counter-" + (startIdx + 2).toString();
     rightVespeneWorkerCounter.textContent = "0/3";        
 
@@ -262,6 +278,7 @@ function setBaseCardWorkerButtons(baseCard) {
 }
 
 function workerButtonDownClick(baseCardId, buttonGroupId) {
+    let base = baseQuerySelector(baseCardId);
     let workerCounter = workerCounterQuerySelector(baseCardId, buttonGroupId);
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
@@ -272,17 +289,18 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
         if (denominator == 3 && numerator < 3) {
             updateVespeneGatherRate(baseCardId);
-            updateTotalVespeneGatherRate('down');
+            updateTotalVespeneGatherRate(numerator, denominator, 'down', base);
         }  else if (denominator == 3 && numerator >= 3) {
             return;
         }  else  {
             updateMineralGatherRate(numerator, baseCardId, denominator);
-            updateTotalMineralGatherRate(numerator, 'down', denominator);
+            updateTotalMineralGatherRate(numerator, denominator, 'down', base);
         }   
     }
 }
 
 function workerButtonUpClick(baseCardId, buttonGroupId) {
+    let base = baseQuerySelector(baseCardId);
     let workerCounter = workerCounterQuerySelector(baseCardId, buttonGroupId);
     let str = workerCounter.textContent;
     let numerator = getNumerator(str);
@@ -293,12 +311,12 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         workerCounter.textContent = numerator.toString() + "/" + denominator.toString();
         if (denominator == 3 && numerator <= 3) {
             updateVespeneGatherRate(baseCardId);
-            updateTotalVespeneGatherRate('up');
+            updateTotalVespeneGatherRate(numerator, denominator, 'up', base);
         }  else if (denominator == 3 && numerator > 3)  {
             return;
         }  else  {
             updateMineralGatherRate(numerator, baseCardId, denominator);
-            updateTotalMineralGatherRate(numerator, 'up', denominator);
+            updateTotalMineralGatherRate(numerator, denominator, 'up', base);
         }
     }    
 }
@@ -320,6 +338,7 @@ function validWorkerUpClick() {
 // updates mineral gather rate for a single base
 function updateMineralGatherRate(workers, baseCardId, denominator) {    
     let base = baseQuerySelector(baseCardId);
+    let mineralsType = base.getAttribute('minerals-type');
     let currentIncome = base.querySelector('.minerals-income-amount');
     if (denominator == 0) {
         currentIncome.textContent = 0;
@@ -329,9 +348,9 @@ function updateMineralGatherRate(workers, baseCardId, denominator) {
     let int = 0;
     for (i = 0; i < workers; i++) {
         if (i < denominator) {
-            int += OPTIMAL_MINERAL_GATHER_RATE;
+            int += gatherRates[`${mineralsType}Optimal`];
         }   else if (i < denominator * 1.5) {
-            int += SUBOPTIMAL_MINERAL_GATHER_RATE;
+            int += gatherRates[`${mineralsType}Suboptimal`];
         }   else  {
             break;
         }
@@ -340,20 +359,22 @@ function updateMineralGatherRate(workers, baseCardId, denominator) {
 }
 
 // updates total minerals across all bases when a worker is added/subtracted
-function updateTotalMineralGatherRate(workers, flag, denominator) {
+function updateTotalMineralGatherRate(workers, denominator, flag, base) {
     if (denominator == 0) {
         return;  // no need to calculate the mineral gather rate if there are no minerals
     }
 
+    let mineralsType = base.getAttribute('minerals-type');
     let num = parseInt(totalMineralCounter.textContent);
+
     if (workers <= denominator && flag == 'up') {
-        num += OPTIMAL_MINERAL_GATHER_RATE;
+        num += gatherRates[`${mineralsType}Optimal`];
     }   else if (workers <= (denominator * 1.5) && flag == 'up') {
-        num += SUBOPTIMAL_MINERAL_GATHER_RATE;
+        num += gatherRates[`${mineralsType}Suboptimal`];
     }   else if (workers < denominator && flag == 'down') {
-        num -= OPTIMAL_MINERAL_GATHER_RATE;
+        num -= gatherRates[`${mineralsType}Optimal`];
     }   else if (workers < (denominator * 1.5) && flag == 'down')  {
-        num -= SUBOPTIMAL_MINERAL_GATHER_RATE;
+        num -= gatherRates[`${mineralsType}Suboptimal`];
     }
     totalMineralCounter.textContent = num;
 }
@@ -372,21 +393,39 @@ function updateTotalIncomeOnBaseDelete(baseCardId, incomeType) {
 // updates vespene gather rate for a single base
 function updateVespeneGatherRate(baseCardId) {
     let base = baseQuerySelector(baseCardId);
+    let gasType = base.getAttribute('gas-type');
     let income = base.querySelector('.gas-income-amount');
     let leftIdNum = getBasePosition(baseCardId) * 3 - 2;
     let rightIdNum = getBasePosition(baseCardId) * 3;
     let leftVespeneWorkerCount = getNumerator(workerCounterQuerySelector(baseCardId, leftIdNum).textContent);
     let rightVespeneWorkerCount = getNumerator(workerCounterQuerySelector(baseCardId, rightIdNum).textContent);
-    income.textContent = (leftVespeneWorkerCount * VESPENE_GATHER_RATE) + (rightVespeneWorkerCount * VESPENE_GATHER_RATE);
+    
+    let int = 0;
+    let arr = [leftVespeneWorkerCount, rightVespeneWorkerCount];
+    for (i = 0; i < arr.length; i++) {
+        let workerCount = arr[i];
+        if (workerCount == 3) {
+            int += (2 * gatherRates[`${gasType}Optimal`]) + (gatherRates[`${gasType}Suboptimal`]);
+        }   else  {
+            int += (workerCount * gatherRates[`${gasType}Optimal`]);
+        }
+    }
+    income.textContent = int;
 }
 
 // updates total vespene across all bases when a worker is added/subtracted
-function updateTotalVespeneGatherRate(flag) {
+function updateTotalVespeneGatherRate(workers, denominator, flag, base) {
+    let gasType = base.getAttribute('gas-type');
     let num = parseInt(totalVespeneCounter.textContent);
-    if (flag == 'up') {
-        num += VESPENE_GATHER_RATE;
-    }   else  {
-        num -= VESPENE_GATHER_RATE;
+
+    if (workers < denominator && flag == 'up') {
+        num += gatherRates[`${gasType}Optimal`];
+    }   else if (workers == denominator && flag == 'up') {
+        num += gatherRates[`${gasType}Suboptimal`];
+    }   else if (workers < (denominator - 1) && flag == 'down') {
+        num -= gatherRates[`${gasType}Optimal`];
+    }   else if (workers == (denominator - 1)) {
+        num -= gatherRates[`${gasType}Suboptimal`];
     }
     totalVespeneCounter.textContent = num;
 }
@@ -486,4 +525,22 @@ function workerCounterQuerySelector(baseCardId, buttonGroupId) {
 // returns the query selector for the minerals worker counter
 function mineralWorkerCounterQuerySelector(baseCardId) {
     return baseQuerySelector(baseCardId).querySelector('.worker-counter.minerals');
+}
+
+// returns the amount of mineral workers on a given base
+function getBaseTotalMineralWorkers(baseCardId) {
+    let workerCounter = mineralWorkerCounterQuerySelector(baseCardId).textContent;
+    return getNumerator(workerCounter);
+}
+
+// return the amount of gas workers on a given base
+function getBaseTotalGasWorkers(baseCardId) {
+    let total = 0;
+    let base = baseQuerySelector(baseCardId);
+    let workerCounters = base.querySelectorAll('.worker-counter.gas');
+    for (i = 0; i < workerCounters.length; i++) {
+        let workers = getNumerator(workerCounters[i].textContent);
+        total += workers;
+    }
+    return total;
 }
