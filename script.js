@@ -125,7 +125,7 @@ function mineralNodeButtonClick() {
         return;
     }
     let newMaxWorkers = getDenominator(mineralWorkerCounter.textContent);
-    updateMineralGatherRate(currentWorkers, baseCardId, newMaxWorkers);
+    updateMineralGatherRate(currentWorkers, newMaxWorkers, baseCardId);
     let newBaseIncome = getBaseIncome(baseCardId, 'minerals');
     totalMineralCounter.textContent = totalMineralsGatherRate() - previousBaseIncome + newBaseIncome;
 }
@@ -295,7 +295,7 @@ function workerButtonDownClick(baseCardId, buttonGroupId) {
         }  else if (denominator == 3 && numerator >= 3) {
             return;
         }  else  {
-            updateMineralGatherRate(numerator, baseCardId, denominator);
+            updateMineralGatherRate(numerator, denominator, baseCardId);
             updateTotalMineralGatherRate(numerator, denominator, 'down', base);
         }   
     }
@@ -317,7 +317,7 @@ function workerButtonUpClick(baseCardId, buttonGroupId) {
         }  else if (denominator == 3 && numerator > 3)  {
             return;
         }  else  {
-            updateMineralGatherRate(numerator, baseCardId, denominator);
+            updateMineralGatherRate(numerator, denominator, baseCardId);
             updateTotalMineralGatherRate(numerator, denominator, 'up', base);
         }
     }    
@@ -338,16 +338,18 @@ function validWorkerUpClick() {
 }
 
 // updates mineral gather rate for a single base
-function updateMineralGatherRate(workers, baseCardId, denominator) {    
+function updateMineralGatherRate(workers, denominator, baseCardId) {    
     let base = baseQuerySelector(baseCardId);
-    let mineralsType = base.getAttribute('minerals-type');
     let currentIncome = base.querySelector('.minerals-income-amount');
+    
     if (denominator == 0) {
         currentIncome.textContent = 0;
         return;
     }
 
     let int = 0;
+    let mineralsType = base.getAttribute('minerals-type');
+
     for (i = 0; i < workers; i++) {
         if (i < denominator) {
             int += gatherRates[`${mineralsType}Optimal`];
