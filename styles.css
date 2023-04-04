@@ -112,7 +112,7 @@ button:active {
 
 .base-card {
     width: 282px;
-    height: 270px;
+    height: 280px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     background-color: rgba(0, 255, 34, 0.15);
@@ -263,7 +263,7 @@ img.wire-frame {
 
     .base-card  {
         width: 452px;
-        height: 336px;
+        height: 346px;
     }
 
     .worker-counter {
