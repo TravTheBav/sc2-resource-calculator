@@ -161,7 +161,7 @@ img.wire-frame {
     width: 86px;
     height: 86px;
     background-color: transparent;
-    filter: sepia(100%) hue-rotate(200deg) saturate(200%);
+    filter: sepia(75%) hue-rotate(60deg) saturate(300%);
 }
 
 .worker-counter {
